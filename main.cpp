@@ -35,6 +35,25 @@ string encode_data(string data){
 	return encoded_data;
 }
 
+vector<int> get_data_cw(string encoded_data){
+	vector<int> cw(encoded_data.length()/8);
+	for(int i=0; i<encoded_data.length()/8; i++){
+		string byte = "";
+		for(int j=0; j<8; j++){ 
+			byte += encoded_data[i+j];
+		}
+		cw[i] = bitset<8>(byte).set_ulong();
+	}
+	return cw;
+}
+
+multimap<int, int> get_msg_polynomial(string encoded_data, int ec_cw){
+	vector<int> data_cw = get_data_cw(encoded_data);
+	multmap<int, int> msg_polynomial();
+	for(int i=0; i<data_cw.size(); i++)
+		msg_polynomial.insert({i+ec_cw, data_cw[i]});
+	return msg_polynomial;
+}
 
 
 
@@ -42,6 +61,7 @@ int main(){
 	const int MODULE_NUMBER = 25;
 	const int MODULE_SIZE = 15;
 	int length = MODULE_SIZE * MODULE_NUMBER;
+	const int EC_CW = 10;
 
 	// Getting Data
 	string data;
@@ -50,8 +70,9 @@ int main(){
 
 	// Data Encoding
 	string encoded_data = encode_data(data);
-	cout << encoded_data << endl;
-
+	
+	// Divide Data into Codewords
+	
 	// Getting QR Code
 	vector<vector<int>> grid(MODULE_NUMBER, vector<int>(MODULE_NUMBER, 1));
 
