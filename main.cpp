@@ -55,6 +55,22 @@ multimap<int, int> get_msg_polynomial(string encoded_data, int ec_cw){
 	return msg_polynomial;
 }
 
+vector<int> get_ec_cw(multimap<int, int> msg_polynomial, multimap<int, int> generator_polynomial){
+	// Make them same lead
+	int msg_deg = (--msg_polynomial.end())->first;
+	int gen_deg = (--generator_polynomial.end())->first;
+	int diff = msg_deg-gen_deg;
+	multimap<int, int> gen_polynomial;
+	for(auto x : generator_polynomial){
+		gen_polynomial.insert({x.first+diff, x.second});
+	}
+
+	// Long Division
+	multimap<int, int> result;
+	vector<vector<int>> remainder(vector<int>) 
+	while()
+}
+
 
 
 int main(){
@@ -70,8 +86,18 @@ int main(){
 
 	// Data Encoding
 	string encoded_data = encode_data(data);
-	
-	// Divide Data into Codewords
+	multimap<int, int> generator_polynomial = {
+		{9, 251},
+		{8, 67},
+		{7, 46},
+		{6, 61},
+		{5, 118},
+		{4, 70},
+		{3, 64},
+		{2, 94},
+		{1, 32},
+		{0, 45}
+	}
 	
 	// Getting QR Code
 	vector<vector<int>> grid(MODULE_NUMBER, vector<int>(MODULE_NUMBER, 1));
