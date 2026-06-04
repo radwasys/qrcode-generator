@@ -4,11 +4,53 @@ using namespace std;
 #include <SDL2pp/SDL2pp.hh>
 using namespace SDL2pp;
 
+string encode_data(string data){
+	const int DATA_BITS = 272;
+	string encoded_data = "0100"; //Mode Indicator
+	encoded_data += bitset<8>(data.length()).to_string(); // CC Indicator
+
+	// Encoding Characters
+	for(int i=0; i<data.length(); i++)
+		encoded_data += bitset<8>(int(data[i])).to_string();
+
+	// Terminator
+	string terminator(min(DATA_BITS-int(encoded_data.length()), 4), '0');
+
+	// Divisible By 8
+	while ((encoded_data.length()+terminator.length())%8!=0){
+		cout << encoded_data.length() << endl;
+		encoded_data = "0" + encoded_data;
+	}
+
+	// Padding Bytes
+	string pad_bytes = "1110110000010001";
+	int index=0;
+	while(encoded_data.length()+terminator.length()<DATA_BITS){
+		encoded_data += pad_bytes[index%pad_bytes.length()];
+	index++;
+	}
+
+	// Final Message
+	encoded_data += terminator;
+	return encoded_data;
+}
+
+
+
 
 int main(){
 	const int MODULE_NUMBER = 25;
 	const int MODULE_SIZE = 15;
 	int length = MODULE_SIZE * MODULE_NUMBER;
+
+	// Getting Data
+	string data;
+	cout << "Please Enter the Data to be Converted to QR Code: ";
+	cin >> data;
+
+	// Data Encoding
+	string encoded_data = encode_data(data);
+	cout << encoded_data << endl;
 
 	// Getting QR Code
 	vector<vector<int>> grid(MODULE_NUMBER, vector<int>(MODULE_NUMBER, 1));
