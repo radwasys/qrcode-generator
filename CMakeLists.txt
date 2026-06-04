@@ -1,0 +1,6 @@
+set(SDL2PP_WITH_TTF ON)
+cmake_minimum_required(VERSION 3.21)
+project(app)
+add_executable(prog main.cpp)
+find_package(SDL2pp REQUIRED)
+target_link_libraries(prog SDL2pp::SDL2pp)

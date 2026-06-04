@@ -1,0 +1,3 @@
+/home/radwa/Projects/cpp/qrcode_gen/build/CMakeFiles/prog.dir
+/home/radwa/Projects/cpp/qrcode_gen/build/CMakeFiles/edit_cache.dir
+/home/radwa/Projects/cpp/qrcode_gen/build/CMakeFiles/rebuild_cache.dir
