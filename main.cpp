@@ -58,7 +58,20 @@ int main(){
 		for(int j=2; j<=4; j++)
 			grid[i][j]=0;
 
+	// Timing Pattern
+	bool white = true;
+	// Horizontal Pattern
+	for(int j=7; j<18; j++){
+		grid[6][j] = white;
+		white = !white;
+	}
 
+	// Vertical Pattern
+	white = true;
+	for(int i=7; i<18; i++){
+		grid[i][6] = white;
+		white = !white;
+	}
 
 	// Rendering QR Code
 	SDLTTF sdl_ttf;
