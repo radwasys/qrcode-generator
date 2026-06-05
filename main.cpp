@@ -47,29 +47,6 @@ vector<int> get_data_cw(string encoded_data){
 	return cw;
 }
 
-multimap<int, int> get_msg_polynomial(string encoded_data, int ec_cw){
-	vector<int> data_cw = get_data_cw(encoded_data);
-	multmap<int, int> msg_polynomial();
-	for(int i=0; i<data_cw.size(); i++)
-		msg_polynomial.insert({i+ec_cw, data_cw[i]});
-	return msg_polynomial;
-}
-
-vector<int> get_ec_cw(multimap<int, int> msg_polynomial, multimap<int, int> generator_polynomial){
-	// Make them same lead
-	int msg_deg = (--msg_polynomial.end())->first;
-	int gen_deg = (--generator_polynomial.end())->first;
-	int diff = msg_deg-gen_deg;
-	multimap<int, int> gen_polynomial;
-	for(auto x : generator_polynomial){
-		gen_polynomial.insert({x.first+diff, x.second});
-	}
-
-	// Long Division
-	multimap<int, int> result;
-	vector<vector<int>> remainder(vector<int>) 
-	while()
-}
 
 
 
@@ -78,6 +55,7 @@ int main(){
 	const int MODULE_SIZE = 15;
 	int length = MODULE_SIZE * MODULE_NUMBER;
 	const int EC_CW = 10;
+	const string INFO_PATTERN = "111011111000100";
 
 	// Getting Data
 	string data;
@@ -161,6 +139,35 @@ int main(){
 		grid[i][6] = white;
 		white = !white;
 	}
+
+	// Format Information Pattern
+	
+	// Finder 1 Horizontal
+	int k=0;
+	for(int j=0; j<6; j++; k++)
+		grid[8][j] = INFO_PATTERN[k];
+
+	grid[8][k+2] = INFO_PATTERN[++k];
+	grid[8][k+3] = INFO_PATTERN[++k];
+	grid[7][k+3] = INFO_PATTERN[++k];
+
+	// Finder 1 Vertical
+	for(int i=5; i>=0; i--; k++)
+		grid[i][8] = INFO_PATTERN[k];
+		
+
+	// Finder 3
+	k=0;
+	for(int i=24; i>=18; i--; k++)
+		grid[i][8] = INFO_PATTERN[k];
+
+	grid[17][8] = 0; // Dark Module
+
+	// Finder 2
+	for(int j=17; j<25; j++; k++)
+		grid[8][j] = INFO_PATTERN[k];
+	
+	
 
 	// Rendering QR Code
 	SDLTTF sdl_ttf;
