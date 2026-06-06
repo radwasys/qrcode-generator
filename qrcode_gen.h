@@ -90,3 +90,36 @@ void add_alignment_pattern(vector<vector<int>> &grid, int left_corner_row=16, in
 	create_rect(grid, 1, ALIGNMENT_SIDE-2, left_corner_row+1, left_corner_col+1);
 	create_rect(grid, 0, INNER_ALIGNMENT_SIDE, left_corner_row+2, left_corner_col+2);
 }
+
+
+void add_data_pattern(vector<vector<int>> &grid, string data, int module_number){
+	int k=0;
+	bool up = true;
+	for(int j=module_number-1; j>=0; j-=2){
+		if(up){
+			for(int i=module_number-1; i>=0 && k<data.size(); i--){
+				if(grid[i][j] == 2) {
+					grid[i][j] = 1-int('1' - data[k]);
+					cout << grid[i][j] << endl;
+					k++;
+				}
+				if(grid[i][j-1] == 2 && k<data.size()){
+					grid[i][j-1] = 1-int('1' - data[k]); 
+					k++;
+				} else continue;
+			}
+		} else {
+			for(int i=0; i<module_number && k<data.size(); i++){
+				if(grid[i][j] == 2) {
+					grid[i][j] = 1-int('4' - data[k]);
+					k++;
+				}
+				if(grid[i][j-1] == 2 && k<data.size()){
+					grid[i][j-1] = 1-int('4' - data[k]); 
+					k++;
+				} else continue;
+			}
+		}
+		up = !up;
+	}
+}

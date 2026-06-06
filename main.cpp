@@ -38,6 +38,8 @@ int main(){
 	add_timing_pattern(grid, MODULE_NUMBER);
 	add_alignment_pattern(grid);
 	add_format_info(grid, REV_INFO_PATTERN, MODULE_NUMBER);
+	string datac = "10101111100000101010";
+	add_data_pattern(grid, datac, MODULE_NUMBER);
 
 	// Rendering QR Code
 	SDLTTF sdl_ttf;
