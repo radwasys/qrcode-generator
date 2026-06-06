@@ -4,6 +4,15 @@ using namespace std;
 #include <SDL2pp/SDL2pp.hh>
 using namespace SDL2pp;
 
+// Constants
+const int MODULE_NUMBER = 25;
+const int MODULE_SIZE = 15;
+int length = MODULE_SIZE * MODULE_NUMBER;
+const int EC_CW = 10;
+const vector<int> REV_INFO_PATTERN = {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1};
+int side_length = 7;
+int side_length2 = 3;
+
 string encode_data(string data){
 	const int DATA_BITS = 272;
 	string encoded_data = "0100"; //Mode Indicator
@@ -42,28 +51,112 @@ vector<int> get_data_cw(string encoded_data){
 		for(int j=0; j<8; j++){ 
 			byte += encoded_data[i+j];
 		}
-		cw[i] = bitset<8>(byte).set_ulong();
+		cw[i] = bitset<8>(byte).to_ulong();
 	}
 	return cw;
 }
 
+void add_finder_patterns(vector<vector<int>> &grid){
+	// Top Left Finder
+	for(int i=0; i<side_length; i++){
+		grid[i][0] = 0;
+		grid[i][side_length-1] = 0;
+	}
 
+	for(int j=0; j<side_length; j++){
+		grid[0][j] = 0;
+		grid[side_length-1][j] = 0;
+	}
 
+	// Top Right Finder
+	for(int i=0; i<side_length; i++){
+		grid[i][MODULE_NUMBER-side_length] = 0;
+		grid[i][MODULE_NUMBER-1] = 0;
+	}
+
+	for(int j=MODULE_NUMBER-side_length; j<MODULE_NUMBER; j++){
+		grid[0][j] = 0;
+		grid[side_length-1][j] = 0;
+	}
+
+	// Bottom Left Finder
+	for(int i=MODULE_NUMBER-side_length; i<MODULE_NUMBER; i++){
+		grid[i][0] = 0;
+		grid[i][side_length-1] = 0;
+	}
+
+	for(int j=0; j<side_length; j++){
+		grid[MODULE_NUMBER-side_length][j] = 0;
+		grid[MODULE_NUMBER-1][j] = 0;
+	}
+
+	// Top Left Inner Square
+	for(int i=2; i<side_length2+2; i++)
+		for(int j=2; j<side_length2+2; j++)
+			grid[i][j] = 0;
+
+	// Top Right Inner Square
+	for(int i=2; i<side_length2+2; i++)
+		for(int j=MODULE_NUMBER-side_length+2; j<side_length2+MODULE_NUMBER-side_length+2; j++) 
+			grid[i][j] = 0;
+
+	// Bottom Left Inner Square
+	for(int i=MODULE_NUMBER-side_length+2; i<side_length2+MODULE_NUMBER-side_length+2; i++)
+		for(int j=2; j<side_length2+2; j++)
+			grid[i][j] = 0;
+}
+
+void add_timing_pattern(vector<vector<int>> &grid){
+	// Horizontal Timer
+	bool white = true;
+	for(int j=side_length; j<MODULE_NUMBER-side_length; j++){
+		grid[side_length-1][j] = int(white);
+		white = !white;
+	}
+
+	// Vertical Timer
+	white = true;
+	for(int i=side_length; i<MODULE_NUMBER-side_length; i++){
+		grid[i][side_length-1] = int(white);
+		white = !white;
+	}
+}
+
+void add_format_info(vector<vector<int>> &grid){
+	// Finder Pattern 1
+	int k=0;
+	for(int j=0; j<side_length+2; j++){
+		if(grid[side_length+1][j] == 0) continue;
+		grid[side_length+1][j] = REV_INFO_PATTERN[k];
+		k++;
+	}
+
+	for(int i=side_length+1; i>=0; i--){
+		if(grid[i][side_length+1] == 0) continue;
+		grid[i][side_length+1] = REV_INFO_PATTERN[k];
+		k++;
+	}
+
+	// Finder Pattern 3
+	k=0;
+	for(int i=MODULE_NUMBER-1; i>=MODULE_NUMBER-side_length-1; i--){
+		if(i==MODULE_NUMBER-side_length-1){
+			grid[i][side_length+1] = 0;
+			break;
+		}
+		grid[i][side_length+1] = REV_INFO_PATTERN[k];
+		k++;
+	}
+
+	// Finder Pattern 2
+	for(int j=MODULE_NUMBER-side_length-1; j<MODULE_NUMBER; j++){
+		grid[side_length+1][j] = REV_INFO_PATTERN[k];
+		k++;
+	}
+
+}
 
 int main(){
-	const int MODULE_NUMBER = 25;
-	const int MODULE_SIZE = 15;
-	int length = MODULE_SIZE * MODULE_NUMBER;
-	const int EC_CW = 10;
-	const string INFO_PATTERN = "111011111000100";
-
-	// Getting Data
-	string data;
-	cout << "Please Enter the Data to be Converted to QR Code: ";
-	cin >> data;
-
-	// Data Encoding
-	string encoded_data = encode_data(data);
 	multimap<int, int> generator_polynomial = {
 		{9, 251},
 		{8, 67},
@@ -75,110 +168,36 @@ int main(){
 		{2, 94},
 		{1, 32},
 		{0, 45}
-	}
+	};
+
+	// Getting Data
+	string data;
+	cout << "Please Enter the Data to be Converted to QR Code: ";
+	cin >> data;
+
+	// Data Encoding
+	string encoded_data = encode_data(data);
 	
-	// Getting QR Code
+	// Forming QR Code
 	vector<vector<int>> grid(MODULE_NUMBER, vector<int>(MODULE_NUMBER, 1));
 
-	// Generating Oreintation Information
-
-	// Vertical Line 1, 2, 3, 4
-	for(int i=0; i<=6; i++){
-		grid[i][0] = 0;
-		grid[i][6] = 0;
-
-		grid[i][18] = 0;
-		grid[i][24] = 0;
-	}
-	
-	// Horizontal Line 1, 2, 3, 4
-	for(int j=0; j<=6; j++){
-		grid[0][j] = 0;
-		grid[6][j] = 0;
-
-		grid[18][j] = 0;
-		grid[24][j] = 0;
-	}
-	
-	// Horizontal Line 5, 6
-	for(int j=18; j<25; j++){
-		grid[0][j] = 0;
-		grid[6][j] = 0;
-	}
-	
-	// Vertical Line 5, 6
-	for(int i=18; i<25; i++){
-		grid[i][0] = 0;
-		grid[i][6] = 0;
-	}
-	
-	// Right and Left Inner Squares
-	for(int i=2; i<=4; i++){
-		for(int j=2; j<=4; j++)
-			grid[i][j]=0;
-		for(int j=20; j<=22; j++)
-			grid[i][j]=0;
-	}
-
-	// Bottom Inner Square
-	for(int i=20; i<=22; i++)
-		for(int j=2; j<=4; j++)
-			grid[i][j]=0;
-
-	// Timing Pattern
-	bool white = true;
-	// Horizontal Pattern
-	for(int j=7; j<18; j++){
-		grid[6][j] = white;
-		white = !white;
-	}
-
+	// Generating Finder Patterns
+	add_finder_patterns(grid);
+	add_timing_pattern(grid);
 	// Vertical Pattern
-	white = true;
-	for(int i=7; i<18; i++){
-		grid[i][6] = white;
-		white = !white;
-	}
-
-	// Format Information Pattern
-	
-	// Finder 1 Horizontal
-	int k=0;
-	for(int j=0; j<6; j++; k++)
-		grid[8][j] = INFO_PATTERN[k];
-
-	grid[8][k+2] = INFO_PATTERN[++k];
-	grid[8][k+3] = INFO_PATTERN[++k];
-	grid[7][k+3] = INFO_PATTERN[++k];
-
-	// Finder 1 Vertical
-	for(int i=5; i>=0; i--; k++)
-		grid[i][8] = INFO_PATTERN[k];
-		
-
-	// Finder 3
-	k=0;
-	for(int i=24; i>=18; i--; k++)
-		grid[i][8] = INFO_PATTERN[k];
-
-	grid[17][8] = 0; // Dark Module
-
-	// Finder 2
-	for(int j=17; j<25; j++; k++)
-		grid[8][j] = INFO_PATTERN[k];
-	
-	
+	add_format_info(grid);
 
 	// Rendering QR Code
+	
 	SDLTTF sdl_ttf;
-	Window w("demo",  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, length, length, SDL_WINDOW_RESIZABLE);
+	Window w("QR Code",  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, length, length, SDL_WINDOW_RESIZABLE);
 	Renderer r(w, -1, SDL_RENDERER_ACCELERATED);
 	
 	r.Clear();
 	
 	for(int i=0; i<MODULE_NUMBER; i++){
 		for(int j=0; j<MODULE_NUMBER; j++){
-			Rect rect(MODULE_SIZE*i, MODULE_SIZE*j, MODULE_SIZE, MODULE_SIZE);
+			Rect rect(MODULE_SIZE*j, MODULE_SIZE*i, MODULE_SIZE, MODULE_SIZE);
 			if(!grid[i][j]) r.SetDrawColor(0, 0, 0);
 			else r.SetDrawColor(255, 255, 255);
 			r.FillRect(rect);

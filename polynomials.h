@@ -67,16 +67,6 @@ vector<int> get_ec_cw(multimap<int, int> msg_polynomial, multimap<int, int> gene
 			remainder.insert({x.first, (last_coeff+x.second)%255});
 		}
 
-		cout << "Old Remainder: ";
-		for(auto x : old_remainder)
-			cout << "a**" << x.second << " x**" << x.first << " + ";
-		cout << endl;
-
-		cout << "Remainder: ";
-		for(auto x : remainder)
-			cout << "a**" << x.second << " x**" << x.first << " + ";
-		cout << endl;
-
 		// Subtract new remainder from old remainder
 		auto new_it = remainder.rbegin();
 
@@ -92,21 +82,13 @@ vector<int> get_ec_cw(multimap<int, int> msg_polynomial, multimap<int, int> gene
 				rem_coeff = get_num_from_power(rem_coeff);
 
 				new_it->second = get_power_two(int(prerem_coeff^rem_coeff));
-				cout << "prerem:" << prerem_coeff << ",rem:" << rem_coeff << ",xor:" << (prerem_coeff^rem_coeff) << endl;
-				if(new_it->second <= 0) remainder.erase(new_it->first);
+				if(new_it->second < 0) remainder.erase(new_it->first);
 				else new_it++;
 			}else{
 				remainder.insert({prerem_deg, prerem_coeff});
 			}
 		}
 
-		cout << "Remainder after Sub: ";
-		for(auto x : remainder)
-			cout << "a**" << x.second << " x**" << x.first << " + ";
-		cout << endl;
-
-
-		cout << "Rem degree: " << get_degree(remainder) << endl;
 	}
 
 	// Getting Coeffecients of Final Remainder
