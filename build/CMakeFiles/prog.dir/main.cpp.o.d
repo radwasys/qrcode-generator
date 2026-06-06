@@ -507,4 +507,6 @@ CMakeFiles/prog.dir/main.cpp.o: \
  /usr/include/SDL2/SDL_misc.h /usr/local/include/SDL2pp/SDLImage.hh \
  /usr/local/include/SDL2pp/Chunk.hh /usr/include/SDL2/SDL_mixer.h \
  /usr/local/include/SDL2pp/Mixer.hh /usr/local/include/SDL2pp/Music.hh \
- /usr/local/include/SDL2pp/SDLMixer.hh
+ /usr/local/include/SDL2pp/SDLMixer.hh \
+ /home/radwa/Projects/cpp/qrcode_gen/qrcode_gen.h \
+ /home/radwa/Projects/cpp/qrcode_gen/encoding.h
