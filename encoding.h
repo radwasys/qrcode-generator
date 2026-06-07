@@ -71,20 +71,21 @@ int get_num_from_power(int power){
 multimap<int, int> get_msg_polynomial(vector<int> data_cw, int ec_cw=10){
 	multimap<int, int> msg_polynomial;
 	for(int i=0; i<data_cw.size(); i++)
-		msg_polynomial.insert({i+ec_cw, data_cw[i]});
+		msg_polynomial.insert({i+ec_cw, data_cw[data_cw.size() - (i+1)]});
 	return msg_polynomial;
 }
 
 int get_degree(multimap<int, int> polynomial){
-	return (--polynomial.end())->first;
+	return (polynomial.rbegin())->first;
 }
 
 int get_coeffecient(multimap<int, int> polynomial){
-	return (--polynomial.end())->second;
+	return (polynomial.rbegin())->second;
 }
 
-vector<int> get_ec_cw(multimap<int, int> msg_polynomial, multimap<int, int> generator_polynomial){
-	
+vector<int> get_ec_cw(vector<int> data_cw, multimap<int, int> generator_polynomial){
+	multimap<int, int> msg_polynomial = get_msg_polynomial(data_cw);	
+
 	// Convert message polynomial to alpha exponenets
 	for(auto it=msg_polynomial.begin(); it!=msg_polynomial.end(); it++)
 			it->second = get_power_two(it->second);
@@ -93,48 +94,46 @@ vector<int> get_ec_cw(multimap<int, int> msg_polynomial, multimap<int, int> gene
 	multimap<int, int> remainder = msg_polynomial;
 	multimap<int, int> old_remainder;
 
-	for(int i=0; i<msg_polynomial.size(); i++){
-
+	while(get_degree(remainder) >= get_degree(generator_polynomial)){
 		// Make them same lead
-		int msg_deg = (--remainder.end())->first;
-		int gen_deg = (--generator_polynomial.end())->first;
-
+		int msg_deg = (remainder.rbegin())->first;
+		int gen_deg = (generator_polynomial.rbegin())->first;
+		cout << msg_deg << ", " << gen_deg << endl;
 		int diff = msg_deg-gen_deg;
-		multimap<int, int> gen_polynomial;
-		for(auto x : generator_polynomial){
-			gen_polynomial.insert({x.first+diff, x.second});
-		}
+		int factor = get_coeffecient(remainder)-get_coeffecient(generator_polynomial); 
 
 		// Multiply Last element of Result By Generator
-		int last_coeff = get_coeffecient(remainder);
+		cout << "Co: ";
+		for(auto x : remainder) cout << x.second << " ";
+		cout << endl;
+		cout << "Deg: ";
+		for(auto x : remainder) cout << x.first << " ";
+		cout << endl;
+
 		old_remainder = remainder;
 		remainder.clear();
-		for(auto x : gen_polynomial){
-			remainder.insert({x.first, (last_coeff+x.second)%255});
+		for(auto x : generator_polynomial){
+			remainder.insert({x.first+diff, (factor+x.second)%255});
 		}
 
 		// Subtract new remainder from old remainder
-		auto new_it = remainder.rbegin();
-
-		for(auto old_it = old_remainder.rbegin(); old_it != old_remainder.rend(); old_it++){
-			int prerem_coeff = old_it->second;
-			int rem_coeff = new_it->second;
-			int prerem_deg = old_it->first;
-			int rem_deg = new_it->first;
-
-			// Same Degree
-			if(prerem_deg == rem_deg && new_it != remainder.rend()){
-				prerem_coeff = get_num_from_power(prerem_coeff);
-				rem_coeff = get_num_from_power(rem_coeff);
-
-				new_it->second = get_power_two(int(prerem_coeff^rem_coeff));
-				if(new_it->second < 0) remainder.erase(new_it->first);
-				else new_it++;
-			}else{
-				remainder.insert({prerem_deg, prerem_coeff});
-			}
+		set<int> degrees;
+		for(auto i=remainder.begin(); i!=remainder.end(); i++)
+			degrees.insert(i->first);
+		for(auto i=old_remainder.begin(); i!=old_remainder.end(); i++)
+			degrees.insert(i->first);
+		
+		multimap<int, int> sub_result;
+		for(auto x : degrees){
+			int new_coeff = 0;
+			if(old_remainder.find(x) != old_remainder.end())
+				new_coeff = get_num_from_power(old_remainder.find(x)->second);
+			if(remainder.find(x) != remainder.end())
+				new_coeff = (new_coeff^get_num_from_power(remainder.find(x)->second));
+			new_coeff = get_power_two(new_coeff);
+			if(new_coeff >= 0) sub_result.insert({x, new_coeff});
 		}
-
+		remainder = sub_result;
 	}
 
 	// Getting Coeffecients of Final Remainder
@@ -154,4 +153,5 @@ string get_final_msg(vector<int> ec_cw, vector<int> data_cw){
 		msg += bitset<8>(ec_cw[i]).to_string();
 
 	msg += "0000000";
+	return msg;
 }

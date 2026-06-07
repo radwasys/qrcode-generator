@@ -9,12 +9,13 @@ using namespace SDL2pp;
 
 // Constants
 const int MODULE_NUMBER = 25;
-const int MODULE_SIZE = 15;
-int length = MODULE_SIZE * MODULE_NUMBER;
+const int MODULE_SIZE = 20;
+int length = MODULE_SIZE * (MODULE_NUMBER+8);
 const vector<int> REV_INFO_PATTERN = {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1};
 
 int main(){
 	multimap<int, int> generator_polynomial = {
+		{10, 0},
 		{9, 251},
 		{8, 67},
 		{7, 46},
@@ -31,15 +32,29 @@ int main(){
 	string data;
 	cout << "Please Enter the Data to be Converted to QR Code: ";
 	cin >> data;
-
+	
+	// Encode Data
+	string encoded_data = encode_data(data);
+	cout << "check 1" << endl;
+	vector<int> data_cw = get_data_cw(encoded_data);
+	for(auto x : data_cw) cout << x << " ";
+	cout << endl;
+	vector<int> ec_cw = get_ec_cw(data_cw, generator_polynomial);
+	cout << "check3" << endl;
+	for(auto x : ec_cw) cout << x << " ";
+	string msg = get_final_msg(ec_cw, data_cw);
+	cout << "check 4" << endl;
+	cout << msg << endl;	
+	// Represent Data in QR code
 	vector<vector<int>> grid(MODULE_NUMBER, vector<int>(MODULE_NUMBER, 2));
 
 	add_finder_patterns(grid, MODULE_NUMBER);
 	add_timing_pattern(grid, MODULE_NUMBER);
 	add_alignment_pattern(grid);
 	add_format_info(grid, REV_INFO_PATTERN, MODULE_NUMBER);
-	string datac = "10101111100000101010";
-	add_data_pattern(grid, datac, MODULE_NUMBER);
+	cout << "check 5" << endl;
+	add_data_pattern(grid, msg, MODULE_NUMBER);
+	cout << "check 6" << endl;
 
 	// Rendering QR Code
 	SDLTTF sdl_ttf;
@@ -48,11 +63,15 @@ int main(){
 	
 	r.Clear();
 	
+	Rect bg(0, 0, length, length);
+	r.SetDrawColor(255, 255, 255);
+	r.FillRect(bg);
+	
 	for(int i=0; i<MODULE_NUMBER; i++){
 		for(int j=0; j<MODULE_NUMBER; j++){
-			Rect rect(MODULE_SIZE*j, MODULE_SIZE*i, MODULE_SIZE, MODULE_SIZE);
+			Rect rect(MODULE_SIZE*(j+4), MODULE_SIZE*(i+4), MODULE_SIZE, MODULE_SIZE);
 			if(grid[i][j]==0) r.SetDrawColor(0, 0, 0);
-			else if(grid[i][j]==1) r.SetDrawColor(255, 255, 255);
+			else r.SetDrawColor(255, 255, 255);
 			r.FillRect(rect);
 			r.SetDrawColor(255,0,0);
 			r.DrawRect(rect);
