@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include <cmath>
+#include <iterator>
 using namespace std;
 
 string encode_data(string data, int data_bits=272, string mode_indicator="0100",
@@ -16,22 +17,20 @@ string encode_data(string data, int data_bits=272, string mode_indicator="0100",
 
 	// Terminator
 	string terminator(min(data_bits-int(encoded_data.length()), 4), '0');
+	encoded_data += terminator;
 
 	// Make Data bits divisible By 8
-	while ((encoded_data.length()+terminator.length())%8!=0){
-		cout << encoded_data.length() << endl;
-		encoded_data = "0" + encoded_data;
+	while (encoded_data.length()%8!=0){
+		encoded_data += "0";
 	}
 
 	// Add Padding Bytes
 	int index=0;
-	while(encoded_data.length()+terminator.length()<data_bits){
+	while(encoded_data.length() < data_bits){
 		encoded_data += pad_bytes[index%pad_bytes.length()];
-	index++;
+		index++;
 	}
 	
-	// Add Terminator
-	encoded_data += terminator;
 	return encoded_data;
 }
 
@@ -40,7 +39,7 @@ vector<int> get_data_cw(string encoded_data){
 	for(int i=0; i<encoded_data.length()/8; i++){
 		string byte = "";
 		for(int j=0; j<8; j++){ 
-			byte += encoded_data[i+j];
+			byte += encoded_data[(i*8)+j];
 		}
 		cw[i] = bitset<8>(byte).to_ulong();
 	}
@@ -98,17 +97,10 @@ vector<int> get_ec_cw(vector<int> data_cw, multimap<int, int> generator_polynomi
 		// Make them same lead
 		int msg_deg = (remainder.rbegin())->first;
 		int gen_deg = (generator_polynomial.rbegin())->first;
-		cout << msg_deg << ", " << gen_deg << endl;
 		int diff = msg_deg-gen_deg;
 		int factor = get_coeffecient(remainder)-get_coeffecient(generator_polynomial); 
 
 		// Multiply Last element of Result By Generator
-		cout << "Co: ";
-		for(auto x : remainder) cout << x.second << " ";
-		cout << endl;
-		cout << "Deg: ";
-		for(auto x : remainder) cout << x.first << " ";
-		cout << endl;
 
 		old_remainder = remainder;
 		remainder.clear();
@@ -140,18 +132,19 @@ vector<int> get_ec_cw(vector<int> data_cw, multimap<int, int> generator_polynomi
 	vector<int> ec_cw;
 	for(auto x : remainder)
 		ec_cw.push_back(get_num_from_power(x.second));
-
 	return ec_cw;
 }
 
 string get_final_msg(vector<int> ec_cw, vector<int> data_cw){
-	string msg = "";
+	string data_bits = "";
 	for(int i=0; i<data_cw.size(); i++)
-		msg += bitset<8>(data_cw[i]).to_string();
+		data_bits += bitset<8>(data_cw[i]).to_string();
+	
+	string ec_bits = "";
+	for(int i=ec_cw.size()-1; i>=0; i--)
+		ec_bits += bitset<8>(ec_cw[i]).to_string();
 
-	for(int i=0; i<ec_cw.size(); i++)
-		msg += bitset<8>(ec_cw[i]).to_string();
-
+	string msg = data_bits + ec_bits;
 	msg += "0000000";
 	return msg;
 }

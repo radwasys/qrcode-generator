@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <cmath>
 using namespace std;
 
 const int FINDER_SIDE = 7;
@@ -118,15 +119,23 @@ void add_data_pattern(vector<vector<int>> &grid, string data, int n) {
         if (j < 0)
           continue;
         if (grid[row][j] == 2) {
-          grid[row][j] = data[k] - '0';
+          grid[row][j] = 7 - int(data[k] - '-');
           k++;
         }
-        if ((row + col) % 2 == 0)
-          grid[row][col] ^= 1;
       }
       row += up ? -1 : 1;
     }
     up = !up;
     col -= 2;
   }
+}
+
+void add_mask(vector<vector<int>> &grid, int module_number){
+	for(int i=0; i<module_number; i++){
+		for(int j=0; j<module_number; j++){
+			if(grid[i][j] == 4 || grid[i][j] == 3)
+				if((i+j) % 2 == 0)
+					grid[i][j] = 7 - grid[i][j];
+		}
+	}
 }

@@ -5,7 +5,7 @@ prog: \
   CMakeFiles/prog.dir/main.cpp.o \
   /usr/local/lib/libSDL2pp.so.8.3.0 \
   /usr/lib/libSDL2main.a \
-  /usr/lib/libSDL2-2.0.so.0.3200.68 \
+  /usr/lib/libSDL2-2.0.so.0.3200.70 \
   /usr/lib/libSDL2_image.so \
   /usr/lib/libSDL2_ttf.so \
   /usr/lib/libSDL2_mixer.so \
@@ -82,7 +82,7 @@ CMakeFiles/prog.dir/main.cpp.o:
 
 /usr/lib/libSDL2main.a:
 
-/usr/lib/libSDL2-2.0.so.0.3200.68:
+/usr/lib/libSDL2-2.0.so.0.3200.70:
 
 /usr/lib/libSDL2_image.so:
 

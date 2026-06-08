@@ -98,7 +98,7 @@ prog: CMakeFiles/prog.dir/build.make
 prog: CMakeFiles/prog.dir/compiler_depend.ts
 prog: /usr/local/lib/libSDL2pp.so.8.3.0
 prog: /usr/lib/libSDL2main.a
-prog: /usr/lib/libSDL2-2.0.so.0.3200.68
+prog: /usr/lib/libSDL2-2.0.so.0.3200.70
 prog: /usr/lib/libSDL2_image.so
 prog: /usr/lib/libSDL2_ttf.so
 prog: /usr/lib/libSDL2_mixer.so
